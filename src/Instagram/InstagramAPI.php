@@ -3,10 +3,11 @@
 namespace Pvlima\MediaFeed\Instagram;
 
 use GuzzleHttp\Client;
-use Pvlima\MediaFeed\Instagram\Exception\InstagramAPIException;
 use Pvlima\MediaFeed\Instagram\Builder\JsonBuilder;
 use Pvlima\MediaFeed\Instagram\Cache\CacheManager;
 use Pvlima\MediaFeed\Instagram\Service\FeedService;
+
+use Pvlima\MediaFeed\Instagram\Exception\InstagramAPIException;
 
 class InstagramAPI
 {
@@ -59,11 +60,9 @@ class InstagramAPI
         }
 
         $feed     = new FeedService($this->cacheManager, $this->client, $this->endCursor);
-        $builder  = new ResultBuilder($this->endCursor);
-
         $dataFetched = $feed->fetchData($this->userName);
 
-        $builder->setData($dataFetched);
+        $builder = new ResultBuilder($dataFetched);
 
         return $builder->getDataBuild();
     }

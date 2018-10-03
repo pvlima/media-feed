@@ -1,6 +1,6 @@
 # pvlima/media-feed
 
-Plugin para gerenciamento e upload de imagens. Muito simples e fácil de utilizar em qualquer projeto.
+API para obter o feed de publicações de uma página do Instagram
 
 ## Instalação
 
@@ -11,7 +11,7 @@ Plugin para gerenciamento e upload de imagens. Muito simples e fácil de utiliza
 
 ## Exemplo:
 
-   O construtor da classe Pvlima\MediaFeed\Instagram\InstagramAPI() deve receber a instância de Pvlima\MediaFeed\Cache\CacheManager('diretorio/de/cache') para que guarde informações importantes do request.
+   O construtor da classe Pvlima\MediaFeed\Instagram\InstagramAPI() deve receber a instância de Pvlima\MediaFeed\Cache\CacheManager('diretorio/de/cache') para que guarde informações importantes da requisição.
 
     include 'vendor/autoload.php';
 
@@ -41,3 +41,16 @@ Plugin para gerenciamento e upload de imagens. Muito simples e fácil de utiliza
     
     $feed = $api->getFeed();
     echo print_r($feed);
+
+   Neste caso, a variável $feed é uma instância de \Pvlima\MediaFeed\Instagram\Model\Feed, e pode ser manipulada de acordo com os métodos correspondentes:
+
+    echo $feed->getFullName();
+    echo $feed->getBiography();
+    echo $feed->getFollowers();
+
+   É possível também trabalhar diretamente com as postagens através do método $feed->getMedias() que retorna um array contendo as postagens que são instâncias de \Pvlima\MediaFeed\Instagram\Model\Media, e podem ser manipuladas de acordo com os métodos correspondentes:
+
+    foreach($feed->getMedias() as $media){
+          //Para obter o link da imagem do post
+          echo $media->getThumbnailSrc();
+    }

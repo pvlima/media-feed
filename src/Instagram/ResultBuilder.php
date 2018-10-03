@@ -6,6 +6,8 @@ use Pvlima\MediaFeed\Instagram\Model\Feed;
 use Pvlima\MediaFeed\Instagram\Model\Media;
 use Pvlima\MediaFeed\Instagram\Service\FeedServiceAbstract;
 
+use Pvlima\MediaFeed\Instagram\Exception\InstagramAPIException;
+
 class ResultBuilder
 {
     /**
@@ -13,14 +15,9 @@ class ResultBuilder
      */
     private $data;
 
-    /**
-     * @var string|null
-     */
-    private $endCursor;
-
-    public function __construct($endCursor)
+    public function __construct($data = null)
     {
-        $this->endCursor = $endCursor;
+        $this->setData($data);
     }
 
     /**
@@ -64,11 +61,14 @@ class ResultBuilder
             $media->setDate($date);
 
             $media->setComments($node->edge_media_to_comment->count);
+
+            $likes = 0;
+            if(isset($node->edge_liked_by->count))
+                $likes = $node->edge_liked_by->count;
+            if(isset($node->edge_media_preview_like->count))
+                $likes = $node->edge_media_preview_like->count;
             
-            if($this->endCursor == null)
-                $media->setLikes($node->edge_liked_by->count);
-            else 
-                $media->setLikes($node->edge_media_preview_like->count);
+            $media->setLikes($likes);
 
             $media->setLink(FeedServiceAbstract::INSTAGRAM_ENDPOINT . "p/{$node->shortcode}/");
 
@@ -85,6 +85,9 @@ class ResultBuilder
      */
     private function generateFeed()
     {
+        if(!$this->data)
+            throw new InstagramAPIException("Você deve informar os dados a serem processados!");
+        
         $feed = new Feed();
 
         $feed->setEndCursor($this->data->edge_owner_to_timeline_media->page_info->end_cursor);
