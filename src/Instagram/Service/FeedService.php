@@ -94,7 +94,9 @@ class FeedService extends FeedServiceAbstract
             $result->biography = $cache->getBiography();
             $result->full_name = $cache->getFullName();
             $result->profile_pic_url_hd = $cache->getProfilePicture();
+            $result->edge_followed_by = new \stdClass();
             $result->edge_followed_by->count = $cache->getFollowers();
+            $result->edge_follow = new \stdClass();
             $result->edge_follow->count = $cache->getFollowing();
             $result->external_url = $cache->getExternalUrl();
 
