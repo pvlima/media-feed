@@ -7,9 +7,11 @@ use Pvlima\MediaFeed\Instagram\Cache\CacheManager;
 
 abstract class FeedServiceAbstract
 {
+    
     const INSTAGRAM_ENDPOINT = 'https://www.instagram.com/';
-    const USER_AGENT         = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3325.181 Safari/537.36';
-    const QUERY_HASH         = 'c91bcc5598604b1249aaefba78af1ffc';
+    const AUTH_URL           = 'https://www.instagram.com/accounts/login/ajax/';
+    const USER_AGENT         = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.75 Safari/537.36';
+    const QUERY_HASH         = '58b6785bea111c67129decbe6a448951';
 
     /**
      * @var CacheManager

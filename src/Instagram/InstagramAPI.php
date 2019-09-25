@@ -3,72 +3,86 @@
 namespace Pvlima\MediaFeed\Instagram;
 
 use GuzzleHttp\Client;
-use Pvlima\MediaFeed\Instagram\Builder\JsonBuilder;
-use Pvlima\MediaFeed\Instagram\Cache\CacheManager;
-use Pvlima\MediaFeed\Instagram\Service\FeedService;
-
+use GuzzleHttp\Cookie\CookieJar;
+use Pvlima\MediaFeed\Instagram\Auth\Login;
+use Pvlima\MediaFeed\Instagram\Exception\CacheException;
 use Pvlima\MediaFeed\Instagram\Exception\InstagramAPIException;
+use Pvlima\MediaFeed\Instagram\Model\BuildWithoutEndCursor;
+use Pvlima\MediaFeed\Instagram\Model\BuildWithEndCursor;
+use Pvlima\MediaFeed\Instagram\Cache\CacheManager;
+use Pvlima\MediaFeed\Instagram\Service\FeedServiceWithoutEndCursor;
+use Pvlima\MediaFeed\Instagram\Service\FeedServiceWithEndCursor;
 
 class InstagramAPI
 {
     /**
-     * Gerenciador de cache para guardar os resultados
      * @var CacheManager
      */
     private $cacheManager;
 
     /**
-     * Cliente HTTP
      * @var Client
      */
     private $client = null;
 
     /**
-     * Username do Instagram que será gerado o Feed
      * @var string
      */
     private $userName;
 
     /**
-     * Hash do cursor dos resultados para paginação
      * @var string
      */
     private $endCursor = null;
 
-
     /**
-     * @param Client|null $client
+     * Api constructor.
+     *
+     * @param Client|null       $client
      * @param CacheManager|null $cacheManager
      */
-    public function __construct(CacheManager $cacheManager, Client $client = null)
+    public function __construct(CacheManager $cacheManager = null, Client $client = null)
     {
         $this->cacheManager = $cacheManager;
         $this->client       = $client ?: new Client();
     }
 
     /**
-     * Função principal que retorna o Feed do perfil do instagram
-     * @return \Pvlima\MediaFeed\Instagram\Builder\Result\Feed
-     * @throws \Pvlima\MediaFeed\Instagram\Exception\CacheException
-     * @throws \Pvlima\MediaFeed\Instagram\Exception\InstagramAPIException
+     * @param integer $limit
+     *
+     * @return Hydrator\Component\Feed
+     *
+     * @throws CacheException
+     * @throws InstagramAPIException
      * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws \Exception
      */
-    public function getFeed()
+    public function getFeed($limit = 12)
     {
         if (empty($this->userName)) {
-            throw new InstagramAPIException('Username não pode ser vazio!');
+            throw new InstagramAPIException('Username cannot be empty');
         }
 
-        $feed     = new FeedService($this->cacheManager, $this->client, $this->endCursor);
-        $dataFetched = $feed->fetchData($this->userName);
+        if ($this->endCursor) {
+            if (!$this->cacheManager instanceof CacheManager) {
+                throw new CacheException('CacheManager object must be specified to use pagination');
+            }
 
-        $builder = new ResultBuilder($dataFetched);
+            $feed     = new FeedServiceWithEndCursor($this->client, $this->endCursor, $this->cacheManager);
+            $build = new BuildWithEndCursor();
+        } else {
+            $feed     = new FeedServiceWithoutEndCursor($this->client, $this->cacheManager);
+            $build = new BuildWithoutEndCursor();
+        }
 
-        return $builder->getDataBuild();
+        $dataFetched = $feed->fetchData($this->userName, $limit);
+
+        $build->setData($dataFetched);
+
+        return $build->getHydratedData();
     }
 
     /**
-     * Informar o username do perfil do instagram
      * @param string $userName
      */
     public function setUserName($userName)
@@ -77,7 +91,6 @@ class InstagramAPI
     }
 
     /**
-     * Caso queria paginar, informar o cursor da próxima página
      * @param string $endCursor
      */
     public function setEndCursor($endCursor)
@@ -85,4 +98,28 @@ class InstagramAPI
         $this->endCursor = $endCursor;
     }
 
+    /**
+     * @param             $username
+     * @param             $password
+     * @param Client|null $client
+     *
+     * @throws Exception\InstagramAuthException
+     * @throws CacheException
+     * @throws InstagramAPIException
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
+    public function login($username, $password, Client $client = null)
+    {
+        if (!$this->cacheManager instanceof CacheManager) {
+            throw new CacheException('CacheManager is required with login');
+        }
+
+        $login   = new Login($client);
+        $cookies = $login->execute($username, $password);
+
+        if ($cookies instanceof CookieJar) {
+            $this->cacheManager->sessionName = $username;
+            $this->cacheManager->setSession($username, $cookies);
+        }
+    }
 }

@@ -1,24 +1,17 @@
 <?php
 
-namespace Pvlima\MediaFeed\Instagram;
+namespace Pvlima\MediaFeed\Instagram\Model;
 
-use Pvlima\MediaFeed\Instagram\Model\Feed;
-use Pvlima\MediaFeed\Instagram\Model\Media;
+use Pvlima\MediaFeed\Instagram\Model\Component\Feed;
+use Pvlima\MediaFeed\Instagram\Model\Component\Media;
 use Pvlima\MediaFeed\Instagram\Service\FeedServiceAbstract;
 
-use Pvlima\MediaFeed\Instagram\Exception\InstagramAPIException;
-
-class ResultBuilder
+class BuildWithoutEndCursor
 {
     /**
      * @var \stdClass
      */
     private $data;
-
-    public function __construct($data = null)
-    {
-        $this->setData($data);
-    }
 
     /**
      * @param array $data
@@ -30,8 +23,10 @@ class ResultBuilder
 
     /**
      * @return Feed
+     *
+     * @throws \Exception
      */
-    public function getDataBuild()
+    public function getHydratedData()
     {
         $feed = $this->generateFeed();
 
@@ -61,19 +56,22 @@ class ResultBuilder
             $media->setDate($date);
 
             $media->setComments($node->edge_media_to_comment->count);
-
-            $likes = 0;
-            if(isset($node->edge_liked_by->count))
-                $likes = $node->edge_liked_by->count;
-            if(isset($node->edge_media_preview_like->count))
-                $likes = $node->edge_media_preview_like->count;
-            
-            $media->setLikes($likes);
+            $media->setLikes($node->edge_liked_by->count);
 
             $media->setLink(FeedServiceAbstract::INSTAGRAM_ENDPOINT . "p/{$node->shortcode}/");
 
             $media->setThumbnails($node->thumbnail_resources);
 
+            if(isset($node->location)){
+                $media->setLocation($node->location);
+            }
+
+            $media->setVideo((bool)$node->is_video);
+
+            if (property_exists($node, 'video_view_count')) {
+                $media->setVideoViewCount((int)$node->video_view_count);
+            }
+            
             $feed->addMedia($media);
         }
 
@@ -85,12 +83,7 @@ class ResultBuilder
      */
     private function generateFeed()
     {
-        if(!$this->data)
-            throw new InstagramAPIException("Você deve informar os dados a serem processados!");
-        
         $feed = new Feed();
-
-        $feed->setEndCursor($this->data->edge_owner_to_timeline_media->page_info->end_cursor);
 
         $feed->setId($this->data->id);
         $feed->setUserName($this->data->username);
@@ -101,6 +94,9 @@ class ResultBuilder
         $feed->setFollowers($this->data->edge_followed_by->count);
         $feed->setFollowing($this->data->edge_follow->count);
         $feed->setExternalUrl($this->data->external_url);
+        $feed->setPrivate($this->data->is_private);
+        $feed->setVerified($this->data->is_verified);
+        $feed->setEndCursor($this->data->edge_owner_to_timeline_media->page_info->end_cursor);
 
         return $feed;
     }

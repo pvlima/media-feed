@@ -4,9 +4,10 @@ require_once __DIR__ . '/vendor/autoload.php';
 
 $cache = new \Pvlima\MediaFeed\Instagram\Cache\CacheManager(__DIR__ . '/cache/');
 $api   = new \Pvlima\MediaFeed\Instagram\InstagramAPI($cache);
-$api->setUserName('pvlima2');
-// $api->setEndCursor('AQB3YFhMu38VUyjhyvLe3EkoV0zvW5In_cDK8ZD8h7VbJOhKp5CRCq5lsXJJ2fjsubA');
+$api->login('pvlima2', '********');
+$api->setUserName('indoorchannel');
+// $api->setEndCursor('QVFBNWVjSkhqZlUwMTZqaDNjbWZHdmdwdjdydTZTUktUZ1pfZ0hKOXVvcGJKUk5WOGFkRFhIWWNJMG85bi15LTBVMmZ3MmlzajFMOGVEM21fcEEyN3NHSg==');
 
 header('Content-Type: application/json');
-$feed = $api->getFeed();
+$feed = $api->getFeed(50);
 echo json_encode($feed);

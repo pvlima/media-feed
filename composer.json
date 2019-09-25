@@ -12,6 +12,8 @@
         }
     ],
     "require": {
+        "ext-curl": "*",
+        "ext-json": "*",
         "guzzlehttp/guzzle": "^6.3"
     },
 

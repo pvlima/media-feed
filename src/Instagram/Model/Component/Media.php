@@ -1,6 +1,6 @@
 <?php
 
-namespace Pvlima\MediaFeed\Instagram\Model;
+namespace Pvlima\MediaFeed\Instagram\Model\Component;
 
 class Media
 {
@@ -63,6 +63,21 @@ class Media
      * @var array
      */
     public $thumbnails = [];
+
+    /**
+     * @var mixed
+     */
+    public $location;
+
+    /**
+     * @var bool
+     */
+    public $video = false;
+
+    /**
+     * @var int
+     */
+    public $videoViewCount = 0;
 
     /**
      * @return int
@@ -254,5 +269,53 @@ class Media
     public function setThumbnails($thumbnails)
     {
         $this->thumbnails = $thumbnails;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getLocation()
+    {
+        return $this->location;
+    }
+
+    /**
+     * @param mixed $location
+     */
+    public function setLocation($location)
+    {
+        $this->location = $location;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isVideo()
+    {
+        return $this->video;
+    }
+
+    /**
+     * @param bool $video
+     */
+    public function setVideo($video)
+    {
+        $this->video = $video;
+    }
+
+    /**
+     * @return int
+     */
+    public function getVideoViewCount()
+    {
+        return $this->videoViewCount;
+    }
+
+    /**
+     * @param int $videoViewCount
+     */
+    public function setVideoViewCount($videoViewCount)
+    {
+        $this->videoViewCount = $videoViewCount;
     }
 }

@@ -1,6 +1,6 @@
 <?php
 
-namespace Pvlima\MediaFeed\Instagram\Model;
+namespace Pvlima\MediaFeed\Instagram\Model\Component;
 
 class Feed
 {
@@ -43,6 +43,16 @@ class Feed
      * @var string
      */
     public $externalUrl;
+
+    /**
+     * @var bool
+     */
+    public $private;
+
+    /**
+     * @var bool
+     */
+    public $verified;
 
     /**
      * @var integer
@@ -169,6 +179,38 @@ class Feed
     public function setExternalUrl($externalUrl)
     {
         $this->externalUrl = $externalUrl;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isPrivate()
+    {
+        return $this->private;
+    }
+
+    /**
+     * @param bool $private
+     */
+    public function setPrivate($private)
+    {
+        $this->private = $private;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isVerified()
+    {
+        return $this->verified;
+    }
+
+    /**
+     * @param bool $verified
+     */
+    public function setVerified($verified)
+    {
+        $this->verified = $verified;
     }
 
     /**
