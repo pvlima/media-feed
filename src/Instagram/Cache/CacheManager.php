@@ -112,11 +112,13 @@ class CacheManager
      *
      * @return null
      */
-    public function getSession()
+    public function getSession($username = null)
     {
-        if (is_file($this->getSessionFile($this->sessionName))) {
-            $handle = fopen($this->getSessionFile($this->sessionName), 'r');
-            $data   = fread($handle, filesize($this->getSessionFile($this->sessionName)));
+        $username = $username ? $username : $this->sessionName;
+
+        if (is_file($this->getSessionFile($username))) {
+            $handle = fopen($this->getSessionFile($username), 'r');
+            $data   = fread($handle, filesize($this->getSessionFile($username)));
             $session  = unserialize($data);
 
             fclose($handle);

@@ -114,12 +114,24 @@ class InstagramAPI
             throw new CacheException('CacheManager is required with login');
         }
 
+        if($cookieJar = $this->cacheManager->getSession($username)) {
+            $sessionid = $cookieJar->getCookieByName('sessionid');
+
+            $expires = ($sessionid->getExpires() - time());
+            if($expires > 0) {
+                return true;
+            }
+        }
+
         $login   = new Login($client);
         $cookies = $login->execute($username, $password);
 
         if ($cookies instanceof CookieJar) {
             $this->cacheManager->sessionName = $username;
             $this->cacheManager->setSession($username, $cookies);
+            return true;
         }
+
+        return false;
     }
 }
